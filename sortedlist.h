@@ -3,8 +3,7 @@ typedef struct{
 	linkedlist* list;
 	int (*cmp)(void* a, void* b);
 	iterator* iter;
-}
-sortedlist;
+} sortedlist;
 extern sortedlist* sortedlist_init(int datasize, int (*cmp)(void* a, void* b));
 extern void sortedlist_add(sortedlist* list,void* data);
 extern void* sortedlist_rm(sortedlist* list, void* data); 
