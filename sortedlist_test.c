@@ -6,8 +6,6 @@ int main(){
 	int n=50;
 	int d=10000000;
 	int r;
-	int * meow;
-	int ppppp=123212321;
 	//tests the sorting by putting a bunch of random numbers into the list
 	//and looking too see whether they're sorted
 	//dividing by d is just so that you can easily read the numbers
@@ -18,14 +16,14 @@ int main(){
 		//printf("%d ",r);
 		sortedlist_add(list,&r);
 	}
+	printf("front is %d\n",*(int*)sortedlist_get_min(list));
+	sortedlist_rm_max(list);
+	sortedlist_rm_min(list);
 	iterator* iter=sortedlist_iterator(list);
-	meow=&ppppp;
-	sortedlist_rm(list, meow);
 	while(sortedlist_iteratorhasnext(iter)){
 		printf("%d ",*(int*)sortedlist_iteratornext(iter));
 	}
 	printf("\n");
-	
 	
 	sortedlist_freeiter(iter);
 	sortedlist_free(list);

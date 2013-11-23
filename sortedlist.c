@@ -70,6 +70,18 @@ void* sortedlist_rm(sortedlist* this, void* data){
 	rmdata=linkedlist_iteratorrm(this->iter);
 	return rmdata;
 }
+void* sortedlist_get_min(sortedlist* this){
+	return linkedlist_getfront(this->list);
+}
+void* sortedlist_get_max(sortedlist* this){
+	return linkedlist_getend(this->list);
+}
+void* sortedlist_rm_min(sortedlist* this){
+	return linkedlist_rmfront(this->list);
+}
+void* sortedlist_rm_max(sortedlist* this){
+	return linkedlist_rmend(this->list);
+}
 iterator* sortedlist_iterator(sortedlist* this){
 	return linkedlist_iterator(this->list);
 }
