@@ -1,3 +1,7 @@
+/*
+ * Shiying Zheng and Ben Stern, hw9
+ */
+
 #include "sortedlist.h"
 sortedlist* sortedlist_init(int datasize, int (*cmp)(void* a, void* b)){
 	sortedlist* this=malloc(sizeof(sortedlist));
@@ -35,7 +39,37 @@ void sortedlist_add(sortedlist* this,void* data){
 	}
 	linkedlist_iteratoradd(this->iter,data);
 }
-void* sortedlist_rm(sortedlist* list, void* data); 
+void* sortedlist_rm(sortedlist* this, void* data){
+	int comparison;
+	void * rmdata;
+	if (linkedlist_iteratorhasnext(this->iter)){
+		comparison=this->cmp(data, linkedlist_iteratornext(this->iter));
+		if (comparison>0){
+			while(comparison>0&&linkedlist_iteratorhasnext(this->iter)){
+				comparison=this->cmp(data, linkedlist_iteratornext(this->iter));
+			}
+			if (comparison<0) return NULL;
+		}
+		else {
+			while(comparison<0&&linkedlist_iteratorhasprev(this->iter)){
+				comparison=this->cmp(data, linkedlist_iteratorprev(this->iter));
+			}
+			if (comparison>0) return NULL;
+		}
+	}
+	else if (linkedlist_iteratorhasprev(this->iter)){
+		comparison=this->cmp(data,linkedlist_iteratorprev(this->iter));
+		while(comparison<0&&linkedlist_iteratorhasprev(this->iter)){
+			comparison=this->cmp(data,linkedlist_iteratorprev(this->iter));
+		}
+		if(comparison>0) return NULL;
+	}
+	if(linkedlist_iteratorhasnext(this->iter)){
+		linkedlist_iteratornext(this->iter);
+	}
+	rmdata=linkedlist_iteratorrm(this->iter);
+	return rmdata;
+}
 iterator* sortedlist_iterator(sortedlist* this){
 	return linkedlist_iterator(this->list);
 }
