@@ -14,3 +14,7 @@ extern void* sortedlist_iteratornext(iterator* iter);
 extern void* sortedlist_iteratorprev(iterator* iter);
 extern void sortedlist_freeiter(iterator* iter);
 extern void sortedlist_free(sortedlist* list);
+extern void* sortedlist_get_min(sortedlist* list);
+extern void* sortedlist_get_max(sortedlist* list);
+extern void* sortedlist_rm_min(sortedlist* list);
+extern void* sortedlist_rm_max(sortedlist* list);
