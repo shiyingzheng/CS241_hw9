@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <string.h>
+#include <math.h>
 /*
  * A definition for a huffman tree
  */
-typedef struct huffmantree{
+struct huffmantree{
 	int c;
 	int count;
-	huffmantree* left;
-	huffmantree* right;
-} huffmantree;
+	struct huffmantree* left;
+	struct huffmantree* right;
+};
+typedef struct huffmantree huffmantree;
 extern huffmantree* huffmantree_init();
 extern huffmantree* huffmantree_init_from_string(char* string);
 extern char* huffmantree_tostring();

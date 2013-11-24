@@ -9,5 +9,8 @@ sortedlist: linkedlist.o sortedlist.c
 sortedlist_test: sortedlist.c sortedlist.o linkedlist.o
 	clang -std=c99 -g -o sortedlist_test sortedlist_test.c sortedlist.o linkedlist.o
 
+huffmantree: huffmantree.c
+	clang -g -c huffmantree.c -lm
+
 clean:
-	rm -f sortedlist.o linkedlist.o sortedlist_test *~
+	rm -f sortedlist.o linkedlist.o sortedlist_test huffmantree *~
