@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <string.h>
 #include <math.h>
+#include "sortedlist.h"
 /*
  * A definition for a huffman tree
  */

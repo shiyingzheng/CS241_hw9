@@ -22,19 +22,30 @@ int to_char(char* string){
 	}
 	return sum;
 }
-huffmantree* huffmantree_init_from_string(char* string){
+huffmantree* huffmantree_init_from_stream(FILE* stream){
 	huffmantree* tree=malloc(sizeof(huffmantree));
 	if(!tree) error();
-	tree->c=to_char(string);
+	char buffer[CHAR_BIT+1];
+	char* bufferptr=buffer;
+	fgets(bufferptr,2,stream);
+	char firstbit=bufferptr[0]-'0';
+	if(!firstbit){
+		tree->left=huffmantree_init_from_stream(stream);
+		tree->right=huffmantree_init_from_stream(stream);
+	}
+	else{
+		fgets(bufferptr,CHAR_BIT+1,stream);
+		tree->c=to_char(bufferptr);
+		tree->left=NULL;
+		tree->right=NULL;
+	}
 	tree->count=0;
-	tree->left=NULL;
-	tree->right=NULL;
 	return tree;
 }
 char* tobinary(int c){
 	int i;
     int mask=1;
-    char* val=malloc(sizeof(char)*CHAR_BIT);
+    char* val=malloc(sizeof(char)*CHAR_BIT+1);
 	if (c==EOF){
 		for(i=0;i<CHAR_BIT;i++){
 			val[i]='1';
@@ -47,6 +58,7 @@ char* tobinary(int c){
 			c=c>>1;
 		}
 	}
+	val[CHAR_BIT]=0;
 	return val;
 }
 char* huffmantree_tostring(huffmantree* tree){
@@ -54,8 +66,7 @@ char* huffmantree_tostring(huffmantree* tree){
 	else return strcat("0",strcat(huffmantree_tostring(tree->left), huffmantree_tostring(tree->right)));
 }
 int huffmantree_isleaf(huffmantree* tree){
-	if(!tree->left&&!tree->right) return 1;
-	return 0;
+	return(!tree->left&&!tree->right);
 }
 void huffmantree_free(huffmantree* tree){
 	if (tree->right){
