@@ -70,8 +70,10 @@ char* tobinary(unsigned int n){
 }
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	if (huffmantree_isleaf(tree)){
+		char* str=tobinary(tree->c);
 		strcat(array,"1");
-		strcat(array,tobinary(tree->c));
+		strcat(array,str);
+		free(str);
 	}
 	//printf("%c%c\n",tree->left->c,tree->right->c);
 	else{
