@@ -17,8 +17,8 @@ int main(){
 		sortedlist_add(list,&r);
 	}
 	printf("front is %d\n",*(int*)sortedlist_get_min(list));
-	sortedlist_rm_max(list);
-	sortedlist_rm_min(list);
+	free(sortedlist_rm_max(list));
+	free(sortedlist_rm_min(list));
 	iterator* iter=sortedlist_iterator(list);
 	while(sortedlist_iteratorhasnext(iter)){
 		printf("%d ",*(int*)sortedlist_iteratornext(iter));
