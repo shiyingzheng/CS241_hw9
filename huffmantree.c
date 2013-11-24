@@ -68,19 +68,22 @@ char* tobinary(unsigned int n){
 	//printf("%s %d\n",val,n);
 	return val;
 }
-char* huffmantree_tostring(huffmantree* tree){
-	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1));
-}
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	if (huffmantree_isleaf(tree)){
 		strcat(array,"1");
 		strcat(array,tobinary(tree->c));
+	}
 	//printf("%c%c\n",tree->left->c,tree->right->c);
 	else{
 		strcat(array,"0");
-		strcat(array,huffmantree_tostring(tree->left));
-		strcat(array,huffmantree_tostring(tree->right));
+		huffmantree_tostringhelp(tree->left,array);
+		huffmantree_tostringhelp(tree->right,array);
 	}
+}
+char* huffmantree_tostring(huffmantree* tree){
+	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1));
+	huffmantree_tostringhelp(tree,array);
+	return array;
 }
 int huffmantree_isleaf(huffmantree* tree){
 	return(!tree->left&&!tree->right);
