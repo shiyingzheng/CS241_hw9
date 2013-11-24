@@ -82,6 +82,7 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 }
 char* huffmantree_tostring(huffmantree* tree){
 	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1));
+	array[0]=0;
 	huffmantree_tostringhelp(tree,array);
 	return array;
 }
