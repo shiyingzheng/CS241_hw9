@@ -10,6 +10,7 @@
 struct huffmantree{
 	int c;
 	int count;
+	int size;
 	struct huffmantree* left;
 	struct huffmantree* right;
 };
