@@ -7,7 +7,6 @@ int cmp(void* a, void* b){
 }
 
 huffmantree* frequency(FILE * stream){
-	//printf("meow");
 	int size=(int)pow(2,CHAR_BIT)+1;
 	int array[size];
 	int i;
@@ -34,15 +33,15 @@ huffmantree* frequency(FILE * stream){
 		}
 	}
 	while (sortedlist_size(list)>1){
-		min1=(huffmantree*)sortedlist_rm_min(list);
-		min2=(huffmantree*)sortedlist_rm_min(list);
+		min1=(huffmantree*)sortedlist_rm_min(list);////////////
+		min2=(huffmantree*)sortedlist_rm_min(list);////////////
 		temp=huffmantree_init();
 		temp->left=min1;
 		temp->right=min2;
 		temp->count=min1->count+min2->count;
-		sortedlist_add(list, temp);
+		sortedlist_add(list, temp);////////
 	}
-	max=(huffmantree*)sortedlist_rm_max(list);
+	max=(huffmantree*)sortedlist_rm_max(list);///////////////
 	sortedlist_free(list);
 	return max;
 }
@@ -51,7 +50,7 @@ int main(int argc, char *argv[]){
 	FILE * f=fopen("meow.txt","r");
 
 	huffmantree* tree = frequency(f);
-//	char* string=huffmantree_tostring(tree);
+	char* string=huffmantree_tostring(tree);
 	huffmantree_free(tree);
 //	free(string);
 	fclose(f);
