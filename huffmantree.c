@@ -1,6 +1,7 @@
 #include "huffmantree.h"
 #define NOCHAR -2;
 void error(){
+	perror("Error");
 	exit(3);
 }
 huffmantree* huffmantree_init(){
@@ -23,22 +24,29 @@ int to_char(char* string){
 	}
 	return sum;
 }
-huffmantree* huffmantree_init_from_stream(FILE* stream){
+huffmantree* huffmantree_init_from_list_iter(iterator* iter){
 	huffmantree* tree=malloc(sizeof(huffmantree));
 	if(!tree) error();
 	char buffer[CHAR_BIT+1];
 	char* bufferptr=buffer;
-	fgets(bufferptr,2,stream);
+	if(linkedlist_iteratorhasnext(iter))
+		buffer[0]=*(char*)linkedlist_iteratornext(iter);
+	else perror("something's wrong");
 	char firstbit=bufferptr[0]-'0';
 	if(!firstbit){
-		tree->left=huffmantree_init_from_stream(stream);
-		tree->right=huffmantree_init_from_stream(stream);
+		tree->left=huffmantree_init_from_list_iter(iter);
+		tree->right=huffmantree_init_from_list_iter(iter);
 		tree->size=tree->left->size+tree->right->size+1;
 	}
 	else{
-		fgets(bufferptr,CHAR_BIT+1,stream);
+		for(int i=0;i<CHAR_BIT;++i){
+			if(linkedlist_iteratorhasnext(iter))
+				bufferptr[i]=*(char*)linkedlist_iteratornext(iter);
+			else perror("something's wrong");
+		}
+		bufferptr[CHAR_BIT]=0;
 		tree->c=to_char(bufferptr);
-		//printf("%s %c\n",bufferptr, to_char(bufferptr));
+		//printf("%s\n",bufferptr);
 		tree->left=NULL;
 		tree->right=NULL;
 		tree->size=1;
@@ -47,6 +55,7 @@ huffmantree* huffmantree_init_from_stream(FILE* stream){
 	tree->count=0;
 	return tree;
 }
+
 char* tobinary(unsigned int n){
 	unsigned int c=n;
 	int i;
@@ -67,6 +76,51 @@ char* tobinary(unsigned int n){
 	val[CHAR_BIT]=0;
 	//printf("%s %d\n",val,n);
 	return val;
+}
+huffmantree* huffmantree_init_from_stream(FILE* stream){
+	linkedlist* list=linkedlist_init(sizeof(char));
+	int num0s=0;
+	int num1s=0;
+	char firstbit;
+	char b;
+	int c;
+	int mask=1<<(CHAR_BIT-1);
+	while(1>(num1s-num0s)){
+		c=fgetc(stream);
+		for(int i=0;i<CHAR_BIT;++i){
+			if(c&mask){
+				b='1';
+				num1s++;
+				linkedlist_addend(list,&b);
+				for(int j=0;j<CHAR_BIT;++j){
+					c<<=1;
+					i++;
+					if(i>=CHAR_BIT){
+						c=fgetc(stream);
+						i=0;
+					}
+					if(c&mask) b='1';
+					else b='0';
+					linkedlist_addend(list,&b);
+				}
+			}
+			else{
+				b='0';
+				num0s++;
+				linkedlist_addend(list,&b);
+			}
+			c<<=1;
+		}
+		if(num1s>(mask<<1)){
+			error();
+		}
+	}
+	//printf("%d\n",linkedlist_size(list));
+	iterator* iter=linkedlist_iterator(list);
+	huffmantree* tree=huffmantree_init_from_list_iter(iter);
+	linkedlist_freeiter(iter);
+	linkedlist_free(list);
+	return tree;
 }
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	if (huffmantree_isleaf(tree)){
