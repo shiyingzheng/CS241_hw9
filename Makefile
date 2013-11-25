@@ -1,12 +1,12 @@
-all: sortedlist linkedlist sortedlist_test huffmantree huffmantree_test encode
+all: sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode
 
-linkedlist: linkedlist.c
+linkedlist.o: linkedlist.c
 	clang -g -c linkedlist.c
 
-sortedlist: linkedlist.o sortedlist.c
+sortedlist.o: linkedlist.o sortedlist.c
 	clang -g -c sortedlist.c
 
-huffmantree: huffmantree.c sortedlist.o
+huffmantree.o: huffmantree.c sortedlist.o
 	clang -g -c huffmantree.c
 
 sortedlist_test: sortedlist.c sortedlist.o linkedlist.o

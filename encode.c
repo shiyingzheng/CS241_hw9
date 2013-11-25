@@ -19,7 +19,8 @@ huffmantree* frequency(FILE * stream){
 	for (i=0;i<size;i++){
 		array[i]=0;
 	}
-	while((c=fgetc(stream))!=EOF){
+	while(feof(stream)){
+		c=fgetc(stream);
 		array[c]=array[c]+1;
 	}
 	array[size-1]=1; //EOF
