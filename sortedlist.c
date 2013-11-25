@@ -3,6 +3,9 @@
  */
 
 #include "sortedlist.h"
+/*
+ * 
+ */
 sortedlist* sortedlist_init(int datasize, int (*cmp)(void* a, void* b)){
 	sortedlist* this=malloc(sizeof(sortedlist));
 	if(!this){
@@ -12,6 +15,9 @@ sortedlist* sortedlist_init(int datasize, int (*cmp)(void* a, void* b)){
 	this->cmp=cmp;
 	this->iter=linkedlist_iterator(this->list);
 	return this;
+}
+int sortedlist_size(sortedlist* this){
+	return linkedlist_size(this->list);
 }
 void sortedlist_add(sortedlist* this,void* data){
 	int comparison;

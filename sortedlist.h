@@ -5,6 +5,7 @@ typedef struct{
 	iterator* iter;
 } sortedlist;
 extern sortedlist* sortedlist_init(int datasize, int (*cmp)(void* a, void* b));
+extern int sortedlist_size(sortedlist* this);
 extern void sortedlist_add(sortedlist* list,void* data);
 extern void* sortedlist_rm(sortedlist* list, void* data); 
 extern iterator* sortedlist_iterator(sortedlist* list);
