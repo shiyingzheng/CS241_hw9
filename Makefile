@@ -19,4 +19,4 @@ encode: encode.c
 	clang -std=c99 -g -o encode encode.c huffmantree.o sortedlist.o linkedlist.o -lm
 
 clean:
-	rm -f sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test *~
+	rm -f sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode *~
