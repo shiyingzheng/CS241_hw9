@@ -2,9 +2,11 @@
 int main(){
 	FILE* f = fopen("test","r");
 	huffmantree* tree=huffmantree_init_from_stream(f);
-	char * treeval=huffmantree_tostring(tree);
-	printf("%s\n",treeval);
-	free(treeval);
+	char * treestr=huffmantree_tostring(tree);
+	char* treebits=huffmantree_tobits(tree);
+	printf("%s\n%s\n",treestr,treebits);
+	free(treestr);
+	free(treebits);
 	huffmantree_free(tree);
 	fclose(f);
 }
