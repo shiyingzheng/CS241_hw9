@@ -83,10 +83,16 @@ void* sortedlist_get_max(sortedlist* this){
 	return linkedlist_getend(this->list);
 }
 void* sortedlist_rm_min(sortedlist* this){
-	return linkedlist_rmfront(this->list);
+	this->iter->position=0;
+	void* returnthis=linkedlist_rmfront(this->list);
+	this->iter->current=this->iter->list->head;
+	return returnthis;
 }
 void* sortedlist_rm_max(sortedlist* this){
-	return linkedlist_rmend(this->list);
+	this->iter->position=this->list->size;
+	void* returnthis=linkedlist_rmend(this->list);
+	this->iter->current=this->iter->list->tail;
+	return returnthis;
 }
 iterator* sortedlist_iterator(sortedlist* this){
 	return linkedlist_iterator(this->list);
