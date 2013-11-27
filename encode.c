@@ -19,7 +19,7 @@ huffmantree* frequency(FILE * stream){
 	for (i=0;i<size;i++){
 		array[i]=0;
 	}
-	while(feof(stream)){
+	while(!feof(stream)){
 		c=fgetc(stream);
 		array[c]=array[c]+1;
 	}
@@ -68,14 +68,11 @@ int main(int argc, char *argv[]){
 	FILE * f=fopen("meow","r");
 
 	huffmantree* tree = frequency(f);
-	printf("%d",huffmantree_isleaf(tree));
-	printf("meow%c",tree->c);
 	while(!huffmantree_isleaf(tree)){
-		printf("meow\n");
 		tree=tree->left;
 	}
-	printf("%c",tree->c);
-//	char* string=huffmantree_tostring(tree);
+	char* string=huffmantree_tostring(tree);
+	printf("%s",string);
 	huffmantree_free(tree);
 	//free(string);
 	fclose(f);
