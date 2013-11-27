@@ -68,9 +68,6 @@ int main(int argc, char *argv[]){
 	FILE * f=fopen("meow","r");
 
 	huffmantree* tree = frequency(f);
-	while(!huffmantree_isleaf(tree)){
-		tree=tree->left;
-	}
 	char* string=huffmantree_tostring(tree);
 	printf("%s",string);
 	huffmantree_free(tree);
