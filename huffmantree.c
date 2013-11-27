@@ -130,6 +130,7 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	if (huffmantree_isleaf(tree)){
 		char* str=tobinary(tree->c);
 		strcat(array,"1");
+		printf("%s",array);
 		strcat(array,str);
 		free(str);
 	}
@@ -158,7 +159,7 @@ char* huffmantree_tobits(huffmantree* tree){
 	return array;
 }
 int huffmantree_isleaf(huffmantree* tree){
-	return(!tree->left&&!tree->right);
+	return((!tree->left)&&(!tree->right));
 }
 void huffmantree_free(huffmantree* tree){
 	if (tree->right){
