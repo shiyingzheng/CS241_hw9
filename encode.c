@@ -40,10 +40,12 @@ huffmantree* frequency(FILE * stream){
 	}
 	sortedlist_freeiter(iter);
 	while (sortedlist_size(list)>1){
+		huffmantree** m1=(huffmantree**)sortedlist_rm_min(list);
+		huffmantree** m2=(huffmantree**)sortedlist_rm_min(list);
 		//("list size %d\n",sortedlist_size(list));
-		min1=*(huffmantree**)sortedlist_rm_min(list);
+		min1=*m1;
 		//printf("iterposition %d\n",list->iter->position);
-		min2=*(huffmantree**)sortedlist_rm_min(list);
+		min2=*m2;
 		//printf("iterposition %d\n",list->iter->position);
 		//printf("list size %d\n",sortedlist_size(list));
 		//iterator* iter=sortedlist_iterator(list);
@@ -58,9 +60,13 @@ huffmantree* frequency(FILE * stream){
 		temp->count=min1->count+min2->count;
 		//printf("%d+%d=%d\n",min1->count,min2->count,temp->count);
 		sortedlist_add(list, &temp);
+		free(m1);
+		free(m2);
 	}
-	max=*(huffmantree**)sortedlist_rm_max(list);
+	huffmantree** m=(huffmantree**)sortedlist_rm_max(list);
+	max=*m;
 	sortedlist_free(list);
+	free(m);
 	return max;
 }
 
@@ -69,7 +75,7 @@ int main(int argc, char *argv[]){
 
 	huffmantree* tree = frequency(f);
 	char* string=huffmantree_tostring(tree);
-	printf("%s",string);
+//	printf("%s",string);
 	huffmantree_free(tree);
 	//free(string);
 	fclose(f);

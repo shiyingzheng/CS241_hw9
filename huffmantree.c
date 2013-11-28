@@ -128,15 +128,17 @@ huffmantree* huffmantree_init_from_stream(FILE* stream){
 }
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	if (huffmantree_isleaf(tree)){
-		char* str=tobinary(tree->c);
+		char str[sizeof(char)*CHAR_BIT+1];
+		char* val=tobinary(tree->c);
+		strcpy(str,val);
 		strcat(array,"1");
 		strcat(array,str);
-		free(str);
-		printf("what");
+		printf("%c\n",tree->c);
+		free(val);
 	}
 	//printf("%c%c\n",tree->left->c,tree->right->c);
 	else{
-		printf("mhm");
+//		printf("mhm");
 		strcat(array,"0");
 		huffmantree_tostringhelp(tree->left,array);
 		huffmantree_tostringhelp(tree->right,array);
