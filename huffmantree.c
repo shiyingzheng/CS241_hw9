@@ -133,7 +133,7 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 		strcpy(str,val);
 		strcat(array,"1");
 		strcat(array,str);
-		printf("%c\n",tree->c);
+		printf("%c %d\n",tree->c,tree->count);
 		free(val);
 	}
 	//printf("%c%c\n",tree->left->c,tree->right->c);
