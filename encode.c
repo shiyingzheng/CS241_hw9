@@ -30,6 +30,7 @@ huffmantree* frequency(FILE * stream){
 			tree->c=i;
 			tree->count=array[i];
 			sortedlist_add(list,&tree);
+			//printf("%d\n",i);
 			//huffmantree_free(tree);
 		}
 	}
@@ -71,6 +72,36 @@ huffmantree* frequency(FILE * stream){
 	return max;
 }
 
+void filltable(huffmantree* tree, char** array, char* path){
+	if (huffmantree_isleaf(tree)){
+		int c=tree->c;
+		array[c]=path;
+	}
+	else{
+		char* left_path=strcat(path,"0");
+		char* right_path=strcat(path, "1");
+		filltable(tree->left, array, left_path);
+		filltable(tree->right, array, right_path);
+	}
+}
+
+void fill(huffmantree* tree, char** array){
+	int slot_size=((tree->size-1)/2+1)*sizeof(char); 
+	char* path=malloc(slot_size);
+	filltable(tree, array, path);
+}
+
+char** table(huffmantree* tree){
+	int size=(int)pow(2,CHAR_BIT)+1;
+	int slot_size=((tree->size-1)/2+1)*sizeof(char); 
+	char** array=malloc(sizeof(char*)*size);
+	for(int i=0;i<size;++i){
+		array[i]=malloc(slot_size);
+	}
+	fill(tree, array);
+	return array;
+}
+
 int main(int argc, char *argv[]){
 	FILE * f=fopen("meow","r");
 
@@ -79,10 +110,10 @@ int main(int argc, char *argv[]){
 	printf("%s\n",string);
 	free(string);
 	unsigned char* bitstring=huffmantree_tobits(tree);
-	for(int i=0;bitstring[i]!=0;++i){
+/*	for(int i=0;bitstring[i]!=0;++i){
 		printf("%d ",bitstring[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	free(bitstring);
 	huffmantree_free(tree);
 	//free(string);

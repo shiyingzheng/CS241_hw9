@@ -64,7 +64,8 @@ char* tobinary(unsigned int n){
 	int i;
     int mask=1;
     char* val=malloc(sizeof(char)*CHAR_BIT+1);
-	if (c==EOF){
+    int max=(int)pow(2,CHAR_BIT);
+	if (c==max){
 		for(i=0;i<CHAR_BIT;i++){
 			val[i]='1';
 		}
