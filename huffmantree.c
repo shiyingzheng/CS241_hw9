@@ -9,7 +9,7 @@ huffmantree* huffmantree_init(){
 	if(!tree) error();
 	tree->c=NOCHAR;
 	tree->count=0;
-	tree->size=0;
+	tree->size=1;
 	tree->left=NULL;
 	tree->right=NULL;
 	return tree;
@@ -127,13 +127,12 @@ huffmantree* huffmantree_init_from_stream(FILE* stream){
 	return tree;//return the tree
 }
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
+	//printf("this\n");
 	if (huffmantree_isleaf(tree)){
-		char str[sizeof(char)*CHAR_BIT+1];
 		char* val=tobinary(tree->c);
-		strcpy(str,val);
 		strcat(array,"1");
-		strcat(array,str);
-		printf("%c %d\n",tree->c,tree->count);
+		strcat(array,val);
+		//printf("%s %c %d %d\n",array,tree->c,tree->count,tree->size);
 		free(val);
 	}
 	//printf("%c%c\n",tree->left->c,tree->right->c);
@@ -145,17 +144,18 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 	}
 }
 char* huffmantree_tostring(huffmantree* tree){
-	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1));
+	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1)+1);
+	//printf("sizeof array=%d\n",sizeof(char)*CHAR_BIT*(tree->size+1)*10);
 	array[0]=0;
 	huffmantree_tostringhelp(tree,array);
 	return array;
 }
-char* huffmantree_tobits(huffmantree* tree){
-	char* array=malloc(sizeof(char)*(tree->size+1));
+unsigned char* huffmantree_tobits(huffmantree* tree){
+	unsigned char* array=malloc(sizeof(char)*(tree->size+1));
 	char* string=huffmantree_tostring(tree);
 	int i;
 	for(i=0;i<strlen(string)/CHAR_BIT+1;++i){
-		array[i]=to_char(string+CHAR_BIT*i);
+		array[i]=to_char(string+(CHAR_BIT*i));
 	}
 	array[i]=0;
 	free(string);
