@@ -204,28 +204,30 @@ char* list_to_string(linkedlist* list){
 	return string;
 }
 int main(int argc, char *argv[]){
-	FILE * f=fopen("meow","r");
+	
+
+	/*FILE * f=fopen("meow","r");
 	huffmantree* tree=frequency(f);
 	rewind(f);
 	linkedlist* list=bits(tree,f);
 	char* string=list_to_string(list);
 	printf("%s\n", string);
-	int i=0;
+	int i=0;*/
 	/*while(string[i]){
 		printf("%d %c\n",string[i],string[i]);
 		i++;
 	}*/
-	free(string);
+	/*free(string);*/
 	/*iterator* iter=linkedlist_iterator(list);
 	while(linkedlist_iteratorhasnext(iter)){
 		printf("%c",*(char*)linkedlist_iteratornext(iter));
 	}
 	printf("\n");
 	linkedlist_freeiter(iter);*/
-	huffmantree_free(tree);
+	/*huffmantree_free(tree);
 	linkedlist_free(list);
 	
-	fclose(f);
+	fclose(f);*/
 	/*char* line=malloc(sizeof(char)*LINE_MAX);
 	getline(&line,LINE_MAX,f);
 	huffmantree* tree = frequency(f);
