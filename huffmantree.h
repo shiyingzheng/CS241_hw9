@@ -15,6 +15,7 @@ struct huffmantree{
 	struct huffmantree* right;
 };
 typedef struct huffmantree huffmantree;
+extern void error(void);
 extern huffmantree* huffmantree_init();
 extern huffmantree* huffmantree_init_from_stream(FILE* stream);
 extern char* huffmantree_tostring();
