@@ -1,5 +1,4 @@
 #include "huffmantree.h"
-#define LINE_MAX 1024
 int cmp(void* a, void* b){
 	huffmantree* aa=*(huffmantree**)a;
 	huffmantree* bb=*(huffmantree**)b;

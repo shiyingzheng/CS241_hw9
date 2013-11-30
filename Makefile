@@ -1,4 +1,4 @@
-all: sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode
+all: sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode decode
 
 linkedlist.o: linkedlist.c
 	clang -g -c linkedlist.c
@@ -18,5 +18,8 @@ huffmantree_test: huffmantree.c huffmantree.o sortedlist.o linkedlist.o
 encode: encode.c huffmantree.o sortedlist.o linkedlist.o
 	clang -std=c99 -g -o encode encode.c huffmantree.o sortedlist.o linkedlist.o -lm
 
+decode: decode.c huffmantree.o sortedlist.o linkedlist.o
+	clang -std=c99 -g -o decode decode.c huffmantree.o sortedlist.o linkedlist.o
+
 clean:
-	rm -f sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode *~
+	rm -f sortedlist.o linkedlist.o sortedlist_test huffmantree.o huffmantree_test encode decode *~
