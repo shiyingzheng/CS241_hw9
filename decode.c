@@ -72,6 +72,7 @@ int decode_char(linkedlist* list,huffmantree* tree){
 	return decode_char(list,tree->right);
 }
 void set_eof(linkedlist* list, huffmantree* tree){
+	//printf("Setting EOF\n");
 	if(huffmantree_isleaf(tree)){
 		tree->c=EOF;
 	}
@@ -79,24 +80,29 @@ void set_eof(linkedlist* list, huffmantree* tree){
 		char* p=linkedlist_rmfront(list);
 		char c=*p;
 		free(p);
+		//printf("Setting EOF to %c\n",c);
 		if(c=='0')set_eof(list,tree->left);
 		else set_eof(list,tree->right);
+
 	}
 }
-void extend_list(linkedlist* list,int min_size,FILE* stream){
+int extend_list(linkedlist* list,int min_size,FILE* stream){
 	int ch;
+	int retval=0;
 	char b;
 	int mask=1<<(CHAR_BIT-1);
 	while(linkedlist_size(list)<min_size){
-		ch=fgetc(stream);
+		if((ch=fgetc(stream))==EOF)
+			retval=EOF;
 		for(int i=0;i<CHAR_BIT;++i){
 			if(ch&mask) b='1';
 			else b='0';
-			printf("%c\n",b);
+			//printf("%c\n",b);
 			linkedlist_addend(list,&b);
 			ch<<=1;
 		}
 	}
+	return retval;
 }
 void print_file(linkedlist* list, huffmantree* tree, FILE* stream){
 	//TODO
@@ -112,15 +118,16 @@ void print_file(linkedlist* list, huffmantree* tree, FILE* stream){
 	int min_size=(tree->size-1)/2;
 	int c;
 	extend_list(list,min_size,stream);
-	while(EOF!=(c=decode_char(list,tree))){
-		extend_list(list,min_size,stream);
-		printf("%c",c);
+	while(EOF!=c&&EOF!=(c=decode_char(list,tree))){
+		if(extend_list(list,min_size,stream)==EOF)
+			c=EOF;
+		else printf("%c",c);
 	}
 }
 
 void decode_file(FILE* stream){
 	linkedlist* list=chars_to_bits(stream);
-	printlist(list);
+	//printlist(list);
 	iterator* iter=linkedlist_iterator(list);
 	huffmantree* tree=read_tree(iter);
 	int min_size=(tree->size-1)/2;
@@ -128,23 +135,25 @@ void decode_file(FILE* stream){
 		free(linkedlist_iteratorrm(iter));
 	}
 	linkedlist_freeiter(iter);
-	printlist(list);
-	extend_list(list,min_size,stream);
+	//printlist(list);
+	//printf("Stuff\n");
+	if(EOF==extend_list(list,min_size,stream))printf("Something's wrong here");
+	//printf("MoreStuff\n");
 	set_eof(list,tree);
-	int c;
-	char done=0;
+	//printf("MoreMoreStuff\n");
 	print_file(list,tree,stream);
+	//printf("This is not a joke\n");
 	linkedlist_free(list);
 	huffmantree_free(tree);
 }
 int main(){
-	FILE* f=fopen("meow","r");
+	FILE* f=stdin;//fopen("ruff","r");
 	decode_file(f);
-	rewind(f);
+	/*rewind(f);
 	int c;
 	while((c=fgetc(f))!=EOF){
 		printf("%x ",c);
-	}
+	}*/
 	fclose(f);
 	//Take care of input and output here. Call all the methods in the order from top to bottom, so that we are reading
 	//in bits in the right order.
