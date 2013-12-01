@@ -1,9 +1,14 @@
 #include "huffmantree.h"
 
-//Have a global variable to tell us where we are in the bitarray, a fake stream of bits. 
-char* eof;
-
-linkedlist* char_to_bits(FILE* stream){
+void printlist(linkedlist* list){
+	iterator* iter=linkedlist_iterator(list);
+	while(linkedlist_iteratorhasnext(iter)){
+		printf("%c",*(char*)linkedlist_iteratornext(iter));
+	}
+	printf("\n");
+	linkedlist_freeiter(iter);
+}
+linkedlist* chars_to_bits(FILE* stream){
 	//TODO
 	//This method reads in each character of the file and converts it to its binary representation
 	//and then append to the list
@@ -49,24 +54,51 @@ linkedlist* char_to_bits(FILE* stream){
 			error();
 		}
 	}
+	return list;
 }
-
-huffmantree* read_tree(linkedlist* list){
-	//TODO 
-	iterator* iter=linkedlist_iterator(list);
-	huffmantree_init_from_list_iter(iterator* iter)
-	return NULL;
+huffmantree* read_tree(iterator* iter){
+	huffmantree* tree=huffmantree_init_from_list_iter(iter);
+	return tree;
 }
-
-void find_eof(linkedlist* list){
-	//TODO
-	//Call this method immediately after read_tree().
-	//While the current tree is not a leaf, 
-	//	If the current character in list is a '0', go to the left child of the current tree; otherwise go right.
-	//	Accordingly, append a '0' or a '1' to eof, the global constant.
+int decode_char(linkedlist* list,huffmantree* tree){
+	if(huffmantree_isleaf(tree)){
+		//printf("%d\n",tree->c);
+		return tree->c;
+	}
+	char* p=linkedlist_rmfront(list);
+	char c=*p;
+	free(p);
+	if(c=='0')return decode_char(list,tree->left);
+	return decode_char(list,tree->right);
 }
-
-void print_file(linkedlist* list, huffmantree* tree){
+void set_eof(linkedlist* list, huffmantree* tree){
+	if(huffmantree_isleaf(tree)){
+		tree->c=EOF;
+	}
+	else{
+		char* p=linkedlist_rmfront(list);
+		char c=*p;
+		free(p);
+		if(c=='0')set_eof(list,tree->left);
+		else set_eof(list,tree->right);
+	}
+}
+void extend_list(linkedlist* list,int min_size,FILE* stream){
+	int ch;
+	char b;
+	int mask=1<<(CHAR_BIT-1);
+	while(linkedlist_size(list)<min_size){
+		ch=fgetc(stream);
+		for(int i=0;i<CHAR_BIT;++i){
+			if(ch&mask) b='1';
+			else b='0';
+			printf("%c\n",b);
+			linkedlist_addend(list,&b);
+			ch<<=1;
+		}
+	}
+}
+void print_file(linkedlist* list, huffmantree* tree, FILE* stream){
 	//TODO
 	//This method is used after find_eof().
 	//The algorithm is:
@@ -77,10 +109,43 @@ void print_file(linkedlist* list, huffmantree* tree){
 	//	if the leaf's character and its path are not indicating that it is eof, 
 	//		print tree->c.
 	//	otherwise, we have reached eof and we need to break from the loop.
+	int min_size=(tree->size-1)/2;
+	int c;
+	extend_list(list,min_size,stream);
+	while(EOF!=(c=decode_char(list,tree))){
+		extend_list(list,min_size,stream);
+		printf("%c",c);
+	}
 }
 
+void decode_file(FILE* stream){
+	linkedlist* list=chars_to_bits(stream);
+	printlist(list);
+	iterator* iter=linkedlist_iterator(list);
+	huffmantree* tree=read_tree(iter);
+	int min_size=(tree->size-1)/2;
+	while(linkedlist_iteratorhasprev(iter)){
+		free(linkedlist_iteratorrm(iter));
+	}
+	linkedlist_freeiter(iter);
+	printlist(list);
+	extend_list(list,min_size,stream);
+	set_eof(list,tree);
+	int c;
+	char done=0;
+	print_file(list,tree,stream);
+	linkedlist_free(list);
+	huffmantree_free(tree);
+}
 int main(){
-	return 0;
+	FILE* f=fopen("meow","r");
+	decode_file(f);
+	rewind(f);
+	int c;
+	while((c=fgetc(f))!=EOF){
+		printf("%x ",c);
+	}
+	fclose(f);
 	//Take care of input and output here. Call all the methods in the order from top to bottom, so that we are reading
 	//in bits in the right order.
 }
