@@ -204,75 +204,30 @@ char* list_to_string(linkedlist* list){
 	return string;
 }
 int main(int argc, char *argv[]){
-	
-
-	/*FILE * f=fopen("meow","r");
+	if (argc==1){
+		printf("Error: No input file specified.\n");
+		printf("Usage: argv[0] input_file [output_file]\n");
+		printf("If no output file is specified, the program will print to standard output.\n");
+		exit(3);
+	}
+	FILE* f = fopen(argv[1], "r");
+	if (f == NULL) {
+    	perror("Error\n");
+    }
 	huffmantree* tree=frequency(f);
 	rewind(f);
 	linkedlist* list=bits(tree,f);
 	char* string=list_to_string(list);
-	printf("%s\n", string);
-	int i=0;*/
-	/*while(string[i]){
-		printf("%d %c\n",string[i],string[i]);
-		i++;
-	}*/
-	/*free(string);*/
-	/*iterator* iter=linkedlist_iterator(list);
-	while(linkedlist_iteratorhasnext(iter)){
-		printf("%c",*(char*)linkedlist_iteratornext(iter));
+	if (argc>2){
+		FILE* out=fopen(argv[2], "w");
+		fprintf(out, "%s", string);
+		fclose(out);
 	}
-	printf("\n");
-	linkedlist_freeiter(iter);*/
-	/*huffmantree_free(tree);
-	linkedlist_free(list);
-	
-	fclose(f);*/
-	/*char* line=malloc(sizeof(char)*LINE_MAX);
-	getline(&line,LINE_MAX,f);
-	huffmantree* tree = frequency(f);
-	char** t=table(tree);
-	int numextraptr[1];
-	char* bits=huffmantree_tobits(tree,numextraptr);
-	int numextra=*numextraptr;
-	int mask=1<<(numextra-1)
-	char lastchar=bits[strlen(bits)-2];
-	char* eofstring=table[1<<CHAR_BIT];
-	int i=0;
-	char* stringtoprint=eofstring;
-	while(numextra){
-		if(!stringtoprint[i]){
-			if(eofstring==stringtoprint){
-				stringtoprint=line;
-				i=0;
-			}
-			else(eofstring!=stringtoprint){
-				getline(&line,LINE_MAX,f);
-				i=0;
-			}
-		}
-		lastchar=lastchar|(mask&&eofstring[i]);
-		mask>>=1;
-		numextra--;
-		i++;
-	}
-	printf("%s",bits);
-	while()
+	else printf("%s", string);
+
 	huffmantree_free(tree);
-	
-	fclose(f);*/
-/*	char* infile;
-	char* outfile;
-	if (argc>1){
-		infile=argv[1];
-		outfile=argv[2];
-
-	}
-	else if (argc==1){
-		infile=argv[1];
-	}
-	else {
-
-	}*/
-
+	linkedlist_free(list);
+	free(string);
+	fclose(f);
+	exit(0);
 }
