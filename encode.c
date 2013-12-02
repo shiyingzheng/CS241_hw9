@@ -4,14 +4,6 @@
  */
 #include "huffmantree.h"
  /*
-  * A struct for a string. We need this because there could be a null character
-  * in the encoded file.
-  */
-typedef struct string{
-	char* chars;
-	int size;
-} String;
- /*
   * The comparator for huffmantree.
   * Takes in two void pointers, returns an integer which is positive if 
   *  a's count is bigger than b's count, negative if smaller, and zero if equal.
@@ -20,25 +12,6 @@ int cmp(void* a, void* b){
 	huffmantree* aa=*(huffmantree**)a;
 	huffmantree* bb=*(huffmantree**)b;
 	return aa->count-bb->count;
-}
-/*
- * Initializes a string.
- * Returns a pointer to a string.
- */
-String* string_init(){
-	String* s=malloc(sizeof(String));
-	if(!s) error();
-	s->size=0;
-	return s;
-}
-/*
- * Prints the string to file.
- * Takes in a FILE pointer to print to and a String pointer to print.
- */
-void fprintstring(FILE* out,String* string){
-	for(int i=0;i<string->size;++i){
-		fprintf(out,"%c",string->chars[i]);
-	}
 }
 /*
  * Constructs the huffmantree from the file. Rewind after using the function.
@@ -200,7 +173,7 @@ char** table(huffmantree* tree){
  * Takes in a pointer to a huffmantree and a FILE pointer.
  * Returns a pointer to the linkedlist.
  */
-linkedlist* bits(huffmantree* tree, FILE* f){
+linkedlist* treebits(huffmantree* tree,char** t){
 	linkedlist* list=linkedlist_init(sizeof(char));
 
 	//Add the tree representation to the list.
@@ -214,9 +187,6 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 		i++;
 	}
 	//printf("%d\n",linkedlist_size(list));
-
-	//Gets the table to look up when encoding the original file.
-	char** t=table(tree);
 	int c;
 	char* charstr;
 	charstr=t[1<<CHAR_BIT]; //This is the last entry of the table. Follow to get to the EOF node.
@@ -230,9 +200,18 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 		//printf("EOF %c\n",b);
 		i++;
 	}
-
+	free(treestring);
+	return list;
+}
+//extends the list by numchars*CHAR_BIT nodes and if it reaches EOF then it adds that too.
+void extendlist(linkedlist* list, char** t, int numchars, FILE* f){
 	//Encoding the original file.
-	while(EOF!=(c=fgetc(f))){
+	int i;
+	char b;
+	char* charstr;
+	int j=0;
+	int c;
+	while(j<numchars&&EOF!=(c=fgetc(f))){
 		i=0;
 		charstr=t[c];
 		//printf("%c %s\n",c,t[c]);
@@ -242,7 +221,14 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 			//printf("FILE %c\n",b);
 			i++;
 		}
+		j++;
 	}
+}
+void extendlistwitheof(linkedlist* list,char** t){
+	int c;
+	char* charstr;
+	int i;
+	char b;
 	charstr=t[1<<CHAR_BIT];
 	i=0;
 	while(charstr[i]){
@@ -251,49 +237,41 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 		//printf("EOF %c\n",b);
 		i++;
 	}
-	free_table(t);
-	free(treestring);
-	//printf("%d\n",linkedlist_size(list));
-	return(list);
 }
-/*
- * Converts a linkedlist of 0's and 1's, which are the bit representation of the encoded file,
- * to an String.
- * Takes in a pointer to a linkedlist.
- * Returns a pointer to a String.
- */
-String* list_to_string(linkedlist* list){
-	int remain=CHAR_BIT-(linkedlist_size(list)%CHAR_BIT);
-	int binary_size=linkedlist_size(list)+remain;
-	//printf("%d\n",binary_size);
-	char* string=malloc(sizeof(char)*(binary_size/CHAR_BIT+1));
+void printbits(huffmantree* tree,FILE* stream,FILE* out){
+	char** t=table(tree);
+	linkedlist* list=treebits(tree,t);
 	int counter=0;
+	int maxcharlength=(tree->size+1)/2;
 	int sum=0;
 	int i=0;
-	iterator* iter=linkedlist_iterator(list);
-	string[0]=0;
-	while (counter<binary_size){
-		if (linkedlist_iteratorhasnext(iter)){
-			sum=sum*2+(*(char*)linkedlist_iteratornext(iter)-'0');
+	int eof=0;
+	while(linkedlist_size(list)){
+		if(linkedlist_size(list)<maxcharlength)
+			extendlist(list,t,maxcharlength,stream);
+		if(feof(stream)&&!eof){
+			extendlistwitheof(list,t);
+			eof=1;
 		}
-		else{
-			sum=sum*2;
-		}
+		char* frontbit=(char*)linkedlist_rmfront(list);
+		sum=sum*2+(*frontbit-'0');
+		free(frontbit);
 		counter++;
 		if (counter%CHAR_BIT==0){
-			string[i]=sum;
+			fprintf(out,"%c",sum);
 			//printf("%d %c\n",sum, sum);
-			i++;
 			sum=0;
 		}
 	}
-	//printf("%d\n%s\n",counter,string);
-	string[i]=0;
-	linkedlist_freeiter(iter);
-	String* str=string_init();
-	str->size=binary_size/CHAR_BIT;
-	str->chars=string;
-	return str;
+	i=0;
+	while(counter%CHAR_BIT!=0){
+		i++;
+		sum=sum*2;
+		counter++;
+	}
+	if(i)fprintf(out,"%c",sum);
+	linkedlist_free(list);
+	free_table(t);
 }
 /*
  * The main method.
@@ -315,19 +293,13 @@ int main(int argc, char *argv[]){
 	printf("%s\n",s);
 	free(s);*/
 	rewind(f);
-	linkedlist* list=bits(tree,f);
-	String* string=list_to_string(list);
+	FILE* out=stdout;
 	if (argc>2){
-		FILE* out=fopen(argv[2], "w");
-		fprintstring(out, string);
-		fclose(out);
+		out=fopen(argv[2], "w");
 	}
-	else fprintstring(stdout, string);
-
+	printbits(tree,f,out);
 	huffmantree_free(tree);
-	linkedlist_free(list);
-	free(string->chars);
-	free(string);
 	fclose(f);
+	if(out!=stdout)fclose(out);
 	exit(0);
 }
