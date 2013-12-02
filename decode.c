@@ -1,5 +1,13 @@
-#include "huffmantree.h"
+/*
+ * Shiying Zheng and Ben Stern hw9 
+ * The decode program.
+ */
 
+#include "huffmantree.h"
+/*
+ * Prints a linkedlist of characters.
+ * Takes in a pointer to the linkedlist.
+ */
 void printlist(linkedlist* list){
 	iterator* iter=linkedlist_iterator(list);
 	while(linkedlist_iteratorhasnext(iter)){
@@ -8,8 +16,12 @@ void printlist(linkedlist* list){
 	printf("\n");
 	linkedlist_freeiter(iter);
 }
+/*
+ * Reads in each character of the file and converts it to its binary representation
+ *  and then append to a linkedlist.
+ * Takes in a FILE pointer and returns a pointer to a linkedlist.
+ */
 linkedlist* chars_to_bits(FILE* stream){
-	//TODO
 	//This method reads in each character of the file and converts it to its binary representation
 	//and then append to the list
 	//Each element in the list is a character of either 0 or 1
@@ -49,17 +61,21 @@ linkedlist* chars_to_bits(FILE* stream){
 			}
 			c<<=1;
 		}
-		if(num1s>(mask<<1)){//mask<<1 is actually just 2^char_bit. if there are more than 2^char(bit) nodes then
-						//we're representing more characters than exist in the character range
-			error();
-		}
 	}
 	return list;
 }
+/*
+ * Constructs a tree from the starting elements in a linkedlist.
+ * Takes in a pointer to an iterator over the linkedlist, returns a pointer to a huffmantree.
+ */
 huffmantree* read_tree(iterator* iter){
 	huffmantree* tree=huffmantree_init_from_list_iter(iter);
 	return tree;
 }
+/*
+ * Decodes a character at the front of the list of binary representation of the encoded file.
+ * Takes in a pointer to the linkedlist, returns an integer which represents the character.
+ */
 int decode_char(linkedlist* list,huffmantree* tree){
 	if(huffmantree_isleaf(tree)){
 		//printf("%d\n",tree->c);
@@ -71,6 +87,10 @@ int decode_char(linkedlist* list,huffmantree* tree){
 	if(c=='0')return decode_char(list,tree->left);
 	return decode_char(list,tree->right);
 }
+/*
+ * Setting the character of the right node in the huffmantree to be EOF.
+ * Takes in a pointer to a linkedlist and a pointer to a huffmantree.
+ */
 void set_eof(linkedlist* list, huffmantree* tree){
 	//printf("Setting EOF\n");
 	if(huffmantree_isleaf(tree)){
@@ -86,14 +106,19 @@ void set_eof(linkedlist* list, huffmantree* tree){
 
 	}
 }
-int extend_list(linkedlist* list,int min_size,FILE* stream){
+/*
+ * Extends the buffer linkedlist by reading from the stream.
+ * Takes in a pointer to a linkedlist, an integer which is the minimum size that the buffer should be,
+ *  and a FILE pointer.
+ */
+void extend_list(linkedlist* list,int min_size,FILE* stream){
 	int ch;
-	int retval=0;
 	char b;
 	int mask=1<<(CHAR_BIT-1);
 	while(linkedlist_size(list)<min_size){
-		if((ch=fgetc(stream))==EOF)
-			retval=EOF;
+		ch=fgetc(stream);
+		//if((ch=fgetc(stream))==EOF)
+		//	retval=EOF;
 		for(int i=0;i<CHAR_BIT;++i){
 			if(ch&mask) b='1';
 			else b='0';
@@ -102,10 +127,13 @@ int extend_list(linkedlist* list,int min_size,FILE* stream){
 			ch<<=1;
 		}
 	}
-	return retval;
 }
-void print_file(linkedlist* list, huffmantree* tree, FILE* stream){
-	//TODO
+/*
+ * Prints out the decoded file.
+ * Takes in a pointer to a linkedlist, a pointer to a huffmantree, a FILE pointer which is the input, and 
+ * a FILE pointer which is the output.
+ */
+void print_file(linkedlist* list, huffmantree* tree, FILE* stream,FILE* out){
 	//This method is used after find_eof().
 	//The algorithm is:
 	//While we haven't reached eof,
@@ -117,15 +145,25 @@ void print_file(linkedlist* list, huffmantree* tree, FILE* stream){
 	//	otherwise, we have reached eof and we need to break from the loop.
 	int min_size=(tree->size-1)/2;
 	int c;
+	int eof=0;
 	extend_list(list,min_size,stream);
-	while(EOF!=c&&EOF!=(c=decode_char(list,tree))){
-		if(extend_list(list,min_size,stream)==EOF)
-			c=EOF;
-		else printf("%c",c);
+	while(EOF!=(c=decode_char(list,tree))){
+		//if(!eof){
+			//if(extend_list(list,min_size,stream)==EOF)
+			//	eof=1;
+			//printf("I found the actual end of file");
+		//}
+		//else fprintf(out,"%c",c);
+		extend_list(list,min_size,stream);
+		fprintf(out,"%c",c);
 	}
 }
-
-void decode_file(FILE* stream){
+/*
+ * Calls the appropriate functions to decode a file. 
+ * Takes in a FILE pointer which is the input, and 
+ * a FILE pointer which is the output.
+ */
+void decode_file(FILE* stream,FILE* out){
 	linkedlist* list=chars_to_bits(stream);
 	//printlist(list);
 	iterator* iter=linkedlist_iterator(list);
@@ -137,24 +175,49 @@ void decode_file(FILE* stream){
 	linkedlist_freeiter(iter);
 	//printlist(list);
 	//printf("Stuff\n");
-	if(EOF==extend_list(list,min_size,stream))printf("Something's wrong here");
+	extend_list(list,min_size,stream);
 	//printf("MoreStuff\n");
 	set_eof(list,tree);
 	//printf("MoreMoreStuff\n");
-	print_file(list,tree,stream);
+	print_file(list,tree,stream,out);
 	//printf("This is not a joke\n");
 	linkedlist_free(list);
 	huffmantree_free(tree);
 }
-int main(){
-	FILE* f=stdin;//fopen("ruff","r");
-	decode_file(f);
+/*
+ * The main method.
+ */
+int main(int argc, char *argv[]){
+	if (argc==1){
+		printf("Error: No input file specified.\n");
+		printf("Usage: argv[0] input_file [output_file]\n");
+		printf("If no output file is specified, the program will print to standard output.\n");
+		exit(3);
+	}
+	FILE* f = fopen(argv[1], "r");
+	if (f == NULL) {
+    	perror("In decode, error\n");
+    	exit(3);
+    }
+	
+	if (argc>2){
+		FILE* out=fopen(argv[2], "w");
+		decode_file(f, out);
+		fclose(out);
+	}
+	else decode_file(f, stdout);
+	
+	fclose(f);
+
+	/*
+	FILE* f = fopen("ruff","r");
+	decode_file(f);*/
 	/*rewind(f);
 	int c;
 	while((c=fgetc(f))!=EOF){
 		printf("%x ",c);
 	}*/
-	fclose(f);
+//	fclose(f);
 	//Take care of input and output here. Call all the methods in the order from top to bottom, so that we are reading
 	//in bits in the right order.
 }

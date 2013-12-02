@@ -1,9 +1,22 @@
+/*
+ * Shiying Zheng and Ben Stern hw9
+ * A huffmantree
+ */
+
 #include "huffmantree.h"
 #define NOCHAR -2;
+
+/*
+ * An error method. Prints out the error message and exits program with failure.
+ */
 void error(){
-	perror("Error");
+	perror("Huffmantree error");
 	exit(3);
 }
+/*
+ * Initializes a huffmantree.
+ * Returns a pointer to a huffmantree.
+ */
 huffmantree* huffmantree_init(){
 	huffmantree* tree=malloc(sizeof(huffmantree));
 	if(!tree) error();
@@ -14,6 +27,13 @@ huffmantree* huffmantree_init(){
 	tree->right=NULL;
 	return tree;
 }
+/*
+ * Converts a string of binary representation of a character to the actual number.
+ * For example, "1100001" gets converted into the number 97, which is the ASCII 
+ * value of 'a'.
+ * Takes in a character pointer to an array of characters'0's and '1's.
+ * Returns an integer corresponding to the binary value.
+ */
 int to_char(char* string){
 	int i;
 	int sum=0;
@@ -25,11 +45,41 @@ int to_char(char* string){
 	return sum;
 }
 /*
- * creates a huffman tree from an iterator from a list of '1' chars and '0' chars
+ * Converts an integer to a string of binary representation of the number.
+ * Takes in an unsigned integer, returns a character pointer to the array of characters.
+ */
+char* tobinary(unsigned int n){
+	unsigned int c=n;
+	int i;
+    int mask=1;
+    char* val=malloc(sizeof(char)*CHAR_BIT+1);
+    int max=(int)pow(2,CHAR_BIT);
+	if (c==max){
+		for(i=0;i<CHAR_BIT;i++){
+			val[i]='1';
+		}
+	}
+	else{
+		for (i=CHAR_BIT-1;i>=0;--i){
+			if (mask&c) val[i]='1';
+			else val[i]='0';
+			c=c>>1;
+		}
+	}
+	val[CHAR_BIT]=0;
+	//printf("%s %d\n",val,n);
+	return val;
+}
+/*
+ * Creates a huffman tree from an iterator on a list of '1' chars and '0' chars.
+ * Takes in an iterator, returns a pointer to a huffmantree.
  */
 huffmantree* huffmantree_init_from_list_iter(iterator* iter){
 	huffmantree* tree=malloc(sizeof(huffmantree));//creates a tree
-	if(!tree) error();
+	if(!tree) {
+		printf("Not enough space for a tree :(");
+		error();
+	}
 	char buffer[CHAR_BIT+1];//makes a character array of size CHAR_BIT+1 to allow CHAR_BIT bits and a null character
 	char* bufferptr=buffer;
 	if(linkedlist_iteratorhasnext(iter))//it should always have next but you still should check
@@ -58,29 +108,10 @@ huffmantree* huffmantree_init_from_list_iter(iterator* iter){
 	tree->count=0;//the frequencies are irrelevant once we already know the tree
 	return tree;
 }
-
-char* tobinary(unsigned int n){
-	unsigned int c=n;
-	int i;
-    int mask=1;
-    char* val=malloc(sizeof(char)*CHAR_BIT+1);
-    int max=(int)pow(2,CHAR_BIT);
-	if (c==max){
-		for(i=0;i<CHAR_BIT;i++){
-			val[i]='1';
-		}
-	}
-	else{
-		for (i=CHAR_BIT-1;i>=0;--i){
-			if (mask&c) val[i]='1';
-			else val[i]='0';
-			c=c>>1;
-		}
-	}
-	val[CHAR_BIT]=0;
-	//printf("%s %d\n",val,n);
-	return val;
-}
+/*
+ * Creates a huffman tree from a stream.
+ * Takes in a FILE pointer to the stream, returns a pointer to a huffmantree.
+ */
 huffmantree* huffmantree_init_from_stream(FILE* stream){
 	linkedlist* list=linkedlist_init(sizeof(char));//this method puts all the bits into a list
 	int num0s=0;//count the number of 0s; or internal nodes
@@ -127,8 +158,30 @@ huffmantree* huffmantree_init_from_stream(FILE* stream){
 	linkedlist_free(list);//free the list
 	return tree;//return the tree
 }
+
+/*
+ * The string representation of the tree is built with the pre-order traversal of the tree. 
+ * A 0-bit indicates an internal node which has both a left and right child. 
+ * A 1-bit indicates it is a leaf and the next CHAR_BIT bits represent the value at that node from MSB to LSB.
+ * For a huffmantree like:
+ *          (8)
+ *      /           \
+ * e(3)              (5)
+ *               /       \
+ *           (2)           (3)
+ *         /   \         /   \
+ *       s(1)   h(1) EOF(1)  (2)
+ *                          /   \
+ *                        c(1) \n(1)
+ * We want the string representation to be 
+ * 0 1 01100101 0 0 1 01110011 1 01101000 0 1 11111111 0 1 01100011 1 00001010
+ */
+
+/*
+ * Help method for the tostring method.
+ * Takes in a pointer to a huffmantree and a pointer to a character array.
+ */
 void huffmantree_tostringhelp(huffmantree* tree,char* array){
-	//printf("this\n");
 	if (huffmantree_isleaf(tree)){
 		char* val=tobinary(tree->c);
 		strcat(array,"1");
@@ -144,6 +197,11 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 		huffmantree_tostringhelp(tree->right,array);
 	}
 }
+/*
+ * The tostring method of the huffmantree.
+ * Takes in a pointer to a huffmantree.
+ * Returns a character array that represents the tree.
+ */
 char* huffmantree_tostring(huffmantree* tree){
 	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1)+1);
 	//printf("sizeof array=%d\n",sizeof(char)*CHAR_BIT*(tree->size+1)*10);
@@ -151,6 +209,11 @@ char* huffmantree_tostring(huffmantree* tree){
 	huffmantree_tostringhelp(tree,array);
 	return array;
 }
+/*
+ * Constructs a character array from the string representation of the huffmantree.
+ * Takes in a pointer to a huffmantree.
+ * Returns an array of unsigned characters.
+ */
 unsigned char* huffmantree_tobits(huffmantree* tree){
 	unsigned char* array=malloc(sizeof(char)*(tree->size+1));
 	char* string=huffmantree_tostring(tree);
@@ -162,9 +225,17 @@ unsigned char* huffmantree_tobits(huffmantree* tree){
 	free(string);
 	return array;
 }
+/*
+ * Takes in a pointer to a huffmantree.
+ * Returns non-zero value if huffmantree is a leaf. Otherwise returns 0.
+ */
 int huffmantree_isleaf(huffmantree* tree){
 	return((!tree->left)&&(!tree->right));
 }
+/*
+ * Frees the memory allocated for a huffmantree.
+ * Takes in a pointer to a huffmantree.
+ */
 void huffmantree_free(huffmantree* tree){
 	if (tree->right){
 		huffmantree_free(tree->right);
@@ -174,6 +245,3 @@ void huffmantree_free(huffmantree* tree){
 	}
 	free(tree);
 }
-/*int main(){
-	printf("%d", to_char("01100001"));
-}*/

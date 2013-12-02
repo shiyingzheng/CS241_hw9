@@ -1,11 +1,51 @@
+/*
+ * Shiying Zheng and Ben Stern hw9
+ * The encode program
+ */
 #include "huffmantree.h"
+ /*
+  * A struct for a string. We need this because there could be a null character
+  * in the encoded file.
+  */
+typedef struct string{
+	char* chars;
+	int size;
+} String;
+ /*
+  * The comparator for huffmantree.
+  * Takes in two void pointers, returns an integer which is positive if 
+  *  a's count is bigger than b's count, negative if smaller, and zero if equal.
+  */
 int cmp(void* a, void* b){
 	huffmantree* aa=*(huffmantree**)a;
 	huffmantree* bb=*(huffmantree**)b;
 	return aa->count-bb->count;
 }
-
-huffmantree* frequency(FILE * stream){
+/*
+ * Initializes a string.
+ * Returns a pointer to a string.
+ */
+String* string_init(){
+	String* s=malloc(sizeof(String));
+	if(!s) error();
+	s->size=0;
+	return s;
+}
+/*
+ * Prints the string to file.
+ * Takes in a FILE pointer to print to and a String pointer to print.
+ */
+void fprintstring(FILE* out,String* string){
+	for(int i=0;i<string->size;++i){
+		fprintf(out,"%c",string->chars[i]);
+	}
+}
+/*
+ * Constructs the huffmantree from the file. Rewind after using the function.
+ * Takes in a pointer to a FILE.
+ * Returns a pointer to a huffmantree.
+ */
+huffmantree* frequency_tree(FILE * stream){
 	int size=(int)pow(2,CHAR_BIT)+1;
 	int array[size];
 	int i;
@@ -28,7 +68,7 @@ huffmantree* frequency(FILE * stream){
 			tree->c=i;
 			tree->count=array[i];
 			sortedlist_add(list,&tree);
-			//printf("%d\n",i);
+			//printf("%d %d\n",i,array[i]);
 			//huffmantree_free(tree);
 		}
 	}
@@ -69,6 +109,13 @@ huffmantree* frequency(FILE * stream){
 	free(m);
 	return max;
 }
+/*
+ * Makes a duplicate of a string. We need this because when we call strcat, it will
+ * need a larger size than just the original string.
+ * Takes in a character pointer and an integer which is the size of the character
+ * array.
+ * Returns a pointer to a character array.
+ */
 char* mystrdup(char* string,int size){
 	char* newstr=malloc(sizeof(char)*size);
 	if(!newstr) error();
@@ -81,6 +128,13 @@ char* mystrdup(char* string,int size){
 	//printf("%s %s %d\n",string,newstr,size);
 	return newstr;
 }
+/*
+ * Helper method of fill. 
+ * It assigns a string that represents the path to the character in the huffmantree
+ *	to the corresponding slot in the table, an array of strings.
+ * Takes in a pointer to a huffmantree, a pointer to character pointers, which is the
+ * table, and a character array, which is the collector in the tail recursion.
+ */
 void filltable(huffmantree* tree, char** array, char* path){
 	if (huffmantree_isleaf(tree)){
 		int c=tree->c;
@@ -103,7 +157,10 @@ void filltable(huffmantree* tree, char** array, char* path){
 		//printf("freed %p, %p\n",left_path, right_path);
 	}
 }
-
+/*
+ * Fills a table of paths to characters in the tree.
+ * Takes in a pointer to a huffmantree and a pointer to character pointers.
+ */
 void fill(huffmantree* tree, char** array){
 	int slot_size=((tree->size-1)/2+1)*sizeof(char); //maximum length of a path from root to leaf
 	char* path=malloc(slot_size);
@@ -111,12 +168,21 @@ void fill(huffmantree* tree, char** array){
 	filltable(tree, array, path);
 	free(path);
 }
+/*
+ * Frees the memory allocated for the table.
+ * Takes in a pointer to character pointers, which is the table.
+ */
 void free_table(char** t){
 	for(int i=0;i<pow(2,CHAR_BIT)+1;++i){
 		free(t[i]);
 	}
 	free(t);
 }
+/*
+ * Constructs the table of paths to characters in the tree.
+ * Takes in a pointer to a huffmantree.
+ * Returns a pointer to character pointers, which is the table.
+ */
 char** table(huffmantree* tree){
 	int size=(int)pow(2,CHAR_BIT)+1;
 	int slot_size=((tree->size-1)/2+1)*sizeof(char); //maximum length of a path from root to leaf
@@ -129,8 +195,15 @@ char** table(huffmantree* tree){
 	fill(tree, array);
 	return array;
 }
+/*
+ * Constructs a linkedlist of bits of encoded file.
+ * Takes in a pointer to a huffmantree and a FILE pointer.
+ * Returns a pointer to the linkedlist.
+ */
 linkedlist* bits(huffmantree* tree, FILE* f){
 	linkedlist* list=linkedlist_init(sizeof(char));
+
+	//Add the tree representation to the list.
 	char* treestring=huffmantree_tostring(tree);
 	char b;
 	int i=0;
@@ -140,11 +213,16 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 		//printf("TREE %c\n",b);
 		i++;
 	}
+	//printf("%d\n",linkedlist_size(list));
+
+	//Gets the table to look up when encoding the original file.
 	char** t=table(tree);
 	int c;
 	char* charstr;
-	charstr=t[1<<CHAR_BIT];
+	charstr=t[1<<CHAR_BIT]; //This is the last entry of the table. Follow to get to the EOF node.
 	//printf("%d\n",1<<CHAR_BIT);
+
+	//Adds the path to EOF to the list.
 	i=0;
 	while(charstr[i]){
 		b=charstr[i];
@@ -152,6 +230,8 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 		//printf("EOF %c\n",b);
 		i++;
 	}
+
+	//Encoding the original file.
 	while(EOF!=(c=fgetc(f))){
 		i=0;
 		charstr=t[c];
@@ -173,11 +253,19 @@ linkedlist* bits(huffmantree* tree, FILE* f){
 	}
 	free_table(t);
 	free(treestring);
+	//printf("%d\n",linkedlist_size(list));
 	return(list);
 }
-char* list_to_string(linkedlist* list){
-	int remain=CHAR_BIT-list->size%CHAR_BIT;
-	int binary_size=list->size+remain;
+/*
+ * Converts a linkedlist of 0's and 1's, which are the bit representation of the encoded file,
+ * to an String.
+ * Takes in a pointer to a linkedlist.
+ * Returns a pointer to a String.
+ */
+String* list_to_string(linkedlist* list){
+	int remain=CHAR_BIT-(linkedlist_size(list)%CHAR_BIT);
+	int binary_size=linkedlist_size(list)+remain;
+	//printf("%d\n",binary_size);
 	char* string=malloc(sizeof(char)*(binary_size/CHAR_BIT+1));
 	int counter=0;
 	int sum=0;
@@ -199,10 +287,17 @@ char* list_to_string(linkedlist* list){
 			sum=0;
 		}
 	}
+	//printf("%d\n%s\n",counter,string);
 	string[i]=0;
 	linkedlist_freeiter(iter);
-	return string;
+	String* str=string_init();
+	str->size=binary_size/CHAR_BIT;
+	str->chars=string;
+	return str;
 }
+/*
+ * The main method.
+ */
 int main(int argc, char *argv[]){
 	if (argc==1){
 		printf("Error: No input file specified.\n");
@@ -212,21 +307,26 @@ int main(int argc, char *argv[]){
 	}
 	FILE* f = fopen(argv[1], "r");
 	if (f == NULL) {
-    	perror("Error\n");
+    	perror("In encode, error");
+    	exit(3);
     }
-	huffmantree* tree=frequency(f);
+	huffmantree* tree=frequency_tree(f);
+	/*char* s=huffmantree_tostring(tree);
+	printf("%s\n",s);
+	free(s);*/
 	rewind(f);
 	linkedlist* list=bits(tree,f);
-	char* string=list_to_string(list);
+	String* string=list_to_string(list);
 	if (argc>2){
 		FILE* out=fopen(argv[2], "w");
-		fprintf(out, "%s", string);
+		fprintstring(out, string);
 		fclose(out);
 	}
-	else printf("%s", string);
+	else fprintstring(stdout, string);
 
 	huffmantree_free(tree);
 	linkedlist_free(list);
+	free(string->chars);
 	free(string);
 	fclose(f);
 	exit(0);

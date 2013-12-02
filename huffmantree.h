@@ -1,3 +1,8 @@
+/*
+ * Shiying Zheng and Ben Stern hw9
+ * The header file for the struct huffmantree
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>

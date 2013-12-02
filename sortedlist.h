@@ -1,3 +1,8 @@
+/*
+ * Shiying Zheng and Ben Stern hw9
+ * The header file for the sortedlist data structure.
+ */
+
 #include "linkedlist.h"
 typedef struct{
 	linkedlist* list;

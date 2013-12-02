@@ -1,3 +1,8 @@
+/*
+ * Shiying Zheng and Ben Stern hw9
+ * A test on the sorted list struct
+ */
+
 #include "sortedlist.h"
 int intcmp(void* a, void* b){
 	return *(int*)a-*(int*)b;

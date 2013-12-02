@@ -1,3 +1,22 @@
 CS241_hw9
 =========
 Shiying Zheng and Ben Stern
+
+Encode: encodes files using the huffman algorithm.
+Decode: decodes files using the huffman algorithm.
+
+linkedlist.h and linkedlist.c are the files for constructing linkedlists.
+sortedlist.c and sortedlist.h are for the sortedlist based on linkedlists.
+huffmantree.c and huffmantree.h are the files for constructing huffmantrees. 
+huffmantree_test.c  sortedlist_test.c are the test files for sortedlist and huffmantree.
+decode.c is the program to decode files.
+encode.c is the program to encode files.
+
+No bugs, a lot of good data structures!
+
+Time spent on the assignment: A LOT. We think more than 20 hours.
+
+Interesting designs: linkedlist and sortedlist are not only good for this assignment, but for future use, too!
+
+No warnings and no valgrind errors.
+

@@ -1,3 +1,8 @@
+/*
+ * Shiying Zheng and Ben Stern
+ * A test on the huffmantree.
+ */
+
 #include "huffmantree.h"
 int main(){
 	FILE* f = fopen("test","r");

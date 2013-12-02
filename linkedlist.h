@@ -1,4 +1,5 @@
 /*
+ * Shiying Zheng and Ben Stern hw9
  * A doubly linked list
  */
 #include <stdlib.h>
