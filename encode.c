@@ -226,8 +226,11 @@ void printbits(huffmantree* tree,FILE* stream,FILE* out){
 	int i=0;
 	int eof=0;
 	while(linkedlist_size(list)){
-		if(linkedlist_size(list)<maxcharlength)
-			extendlist(list,t,maxcharlength/CHAR_BIT,stream);
+		//printf("%d\n",linkedlist_size(list));
+		if(linkedlist_size(list)<maxcharlength){
+			if(maxcharlength>CHAR_BIT) extendlist(list,t,maxcharlength/CHAR_BIT,stream);
+			else extendlist(list,t,maxcharlength,stream);
+		}
 		if(feof(stream)&&!eof){
 			extendlistwitheof(list,t);
 			eof=1;
