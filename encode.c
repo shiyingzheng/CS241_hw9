@@ -203,7 +203,10 @@ linkedlist* treebits(huffmantree* tree,char** t){
 	free(treestring);
 	return list;
 }
-//extends the list by numchars*CHAR_BIT nodes and if it reaches EOF then it adds that too.
+/*
+ * extends the list by numchars*CHAR_BIT nodes, adding them from f bitwise into the end of the list
+ * does not add any more if it reaches EOF
+ */
 void extendlist(linkedlist* list, char** t, int numchars, FILE* f){
 	//Encoding the original file.
 	int i;
@@ -224,6 +227,9 @@ void extendlist(linkedlist* list, char** t, int numchars, FILE* f){
 		j++;
 	}
 }
+/*
+ * puts the bits for the new EOF marker at the end of the list
+ */
 void extendlistwitheof(linkedlist* list,char** t){
 	int c;
 	char* charstr;
@@ -238,6 +244,13 @@ void extendlistwitheof(linkedlist* list,char** t){
 		i++;
 	}
 }
+/*
+ * prints the bits from the linked list as chars
+ * takes chars from stream as needed with extend list
+ * until the file reaches EOF.
+ * prints the new eof mapping as well
+ * fills out the rest of the bits with 0's
+ */
 void printbits(huffmantree* tree,FILE* stream,FILE* out){
 	char** t=table(tree);
 	linkedlist* list=treebits(tree,t);
@@ -248,7 +261,7 @@ void printbits(huffmantree* tree,FILE* stream,FILE* out){
 	int eof=0;
 	while(linkedlist_size(list)){
 		if(linkedlist_size(list)<maxcharlength)
-			extendlist(list,t,maxcharlength,stream);
+			extendlist(list,t,maxcharlength/CHAR_BIT,stream);
 		if(feof(stream)&&!eof){
 			extendlistwitheof(list,t);
 			eof=1;
