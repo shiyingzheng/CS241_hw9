@@ -41,37 +41,18 @@ huffmantree* frequency_tree(FILE * stream){
 			tree->c=i;
 			tree->count=array[i];
 			sortedlist_add(list,&tree);
-			//printf("%d %d\n",i,array[i]);
-			//huffmantree_free(tree);
 		}
 	}
-	/*iterator* iter=sortedlist_iterator(list);
-	while(sortedlist_iteratorhasnext(iter)){
-		temp=*(huffmantree**)sortedlist_iteratornext(iter);
-		//printf("%c %d\n",temp->c,temp->count);
-	}
-	sortedlist_freeiter(iter);*/
 	while (sortedlist_size(list)>1){
 		huffmantree** m1=(huffmantree**)sortedlist_rm_min(list);
 		huffmantree** m2=(huffmantree**)sortedlist_rm_min(list);
-		//("list size %d\n",sortedlist_size(list));
 		min1=*m1;
-		//printf("iterposition %d\n",list->iter->position);
 		min2=*m2;
-		//printf("iterposition %d\n",list->iter->position);
-		//printf("list size %d\n",sortedlist_size(list));
-		//iterator* iter=sortedlist_iterator(list);
-		//.while(sortedlist_iteratorhasnext(iter)){
-			//temp=*(huffmantree**)sortedlist_iteratornext(iter);
-			//printf("%p %c %d\n\n",iter->current,temp->c,temp->count);
-		//}
-		//sortedlist_freeiter(iter);
 		temp=huffmantree_init();
 		temp->left=min1;
 		temp->right=min2;
 		temp->count=min1->count+min2->count;
 		temp->size=min1->size+min2->size+1;
-		//printf("%d+%d=%d\n",min1->count,min2->count,temp->count);
 		sortedlist_add(list, &temp);
 		free(m1);
 		free(m2);
@@ -98,7 +79,6 @@ char* mystrdup(char* string,int size){
 		i++;
 	}
 	newstr[i]=0;
-	//printf("%s %s %d\n",string,newstr,size);
 	return newstr;
 }
 /*
@@ -111,8 +91,6 @@ char* mystrdup(char* string,int size){
 void filltable(huffmantree* tree, char** array, char* path){
 	if (huffmantree_isleaf(tree)){
 		int c=tree->c;
-		//printf("This is the number in the tree %d\n",c);
-		//array[c]=mystrdup(path,strlen(path)+1);
 		memcpy(array[c],path,strlen(path)+1);
 	}
 	else{
@@ -120,14 +98,10 @@ void filltable(huffmantree* tree, char** array, char* path){
 		char* right_path=mystrdup(path, strlen(path)+2);
 		strcat(left_path,"0");
 		strcat(right_path, "1");
-		//printf("%lu %lu\n",strlen(path),strlen(left_path));
-		//printf("%s %s\n", left_path, right_path);
-		//printf("%p %p, %p\n",path, left_path, right_path);
 		filltable(tree->left, array, left_path);
 		filltable(tree->right, array, right_path);
 		free(left_path);
 		free(right_path);
-		//printf("freed %p, %p\n",left_path, right_path);
 	}
 }
 /*
@@ -159,7 +133,6 @@ void free_table(char** t){
 char** table(huffmantree* tree){
 	int size=(int)pow(2,CHAR_BIT)+1;
 	int slot_size=((tree->size-1)/2+1)*sizeof(char); //maximum length of a path from root to leaf
-	//printf("Slot size is %d\n",slot_size);
 	char** array=malloc(sizeof(char*)*size);
 	for(int i=0;i<size;++i){
 		array[i]=malloc(slot_size);
@@ -183,21 +156,17 @@ linkedlist* treebits(huffmantree* tree,char** t){
 	while(treestring[i]){
 		b=treestring[i];
 		linkedlist_addend(list,&b);
-		//printf("TREE %c\n",b);
 		i++;
 	}
-	//printf("%d\n",linkedlist_size(list));
 	int c;
 	char* charstr;
 	charstr=t[1<<CHAR_BIT]; //This is the last entry of the table. Follow to get to the EOF node.
-	//printf("%d\n",1<<CHAR_BIT);
 
 	//Adds the path to EOF to the list.
 	i=0;
 	while(charstr[i]){
 		b=charstr[i];
 		linkedlist_addend(list,&b);
-		//printf("EOF %c\n",b);
 		i++;
 	}
 	free(treestring);
@@ -217,11 +186,9 @@ void extendlist(linkedlist* list, char** t, int numchars, FILE* f){
 	while(j<numchars&&EOF!=(c=fgetc(f))){
 		i=0;
 		charstr=t[c];
-		//printf("%c %s\n",c,t[c]);
 		while(charstr[i]){
 			b=charstr[i];
 			linkedlist_addend(list,&b);
-			//printf("FILE %c\n",b);
 			i++;
 		}
 		j++;
@@ -240,7 +207,6 @@ void extendlistwitheof(linkedlist* list,char** t){
 	while(charstr[i]){
 		b=charstr[i];
 		linkedlist_addend(list,&b);
-		//printf("EOF %c\n",b);
 		i++;
 	}
 }
@@ -272,7 +238,6 @@ void printbits(huffmantree* tree,FILE* stream,FILE* out){
 		counter++;
 		if (counter%CHAR_BIT==0){
 			fprintf(out,"%c",sum);
-			//printf("%d %c\n",sum, sum);
 			sum=0;
 		}
 	}
@@ -302,9 +267,6 @@ int main(int argc, char *argv[]){
     	exit(3);
     }
 	huffmantree* tree=frequency_tree(f);
-	/*char* s=huffmantree_tostring(tree);
-	printf("%s\n",s);
-	free(s);*/
 	rewind(f);
 	FILE* out=stdout;
 	if (argc>2){

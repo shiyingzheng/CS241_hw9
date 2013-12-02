@@ -14,9 +14,14 @@ encode.c is the program to encode files.
 
 No bugs, a lot of good data structures!
 
-Time spent on the assignment: A LOT. We think more than 20 hours.
+>>>Time spent on the assignment: A LOT. We think more than 20 hours.<<<
 
-Interesting designs: linkedlist and sortedlist are not only good for this assignment, but for future use, too!
+===============================================
+***********************************************
+Interesting designs: 
+1. linkedlist and sortedlist are not only good for this assignment, but for future use, too!
+2. encode and decode have a buffer of constant size, so for large files, they will take up constant space!
+***********************************************
+===============================================
 
 No warnings and no valgrind errors.
-

@@ -67,7 +67,6 @@ char* tobinary(unsigned int n){
 		}
 	}
 	val[CHAR_BIT]=0;
-	//printf("%s %d\n",val,n);
 	return val;
 }
 /*
@@ -77,7 +76,6 @@ char* tobinary(unsigned int n){
 huffmantree* huffmantree_init_from_list_iter(iterator* iter){
 	huffmantree* tree=malloc(sizeof(huffmantree));//creates a tree
 	if(!tree) {
-		printf("Not enough space for a tree :(");
 		error();
 	}
 	char buffer[CHAR_BIT+1];//makes a character array of size CHAR_BIT+1 to allow CHAR_BIT bits and a null character
@@ -99,11 +97,9 @@ huffmantree* huffmantree_init_from_list_iter(iterator* iter){
 		}
 		bufferptr[CHAR_BIT]=0;//a null character at the end of a string
 		tree->c=to_char(bufferptr);//get the character for the binary digits
-		//printf("%s\n",bufferptr);
 		tree->left=NULL;//if this node is a leaf its children should be null
 		tree->right=NULL;
 		tree->size=1;//since this node is a leaf its size should be one
-//		printf("tree->c %c \n", tree->c);
 	}
 	tree->count=0;//the frequencies are irrelevant once we already know the tree
 	return tree;
@@ -151,7 +147,6 @@ huffmantree* huffmantree_init_from_stream(FILE* stream){
 			error();
 		}
 	}
-	//printf("%d\n",linkedlist_size(list));
 	iterator* iter=linkedlist_iterator(list);//get the iterator
 	huffmantree* tree=huffmantree_init_from_list_iter(iter);//construct the tree with the iterator
 	linkedlist_freeiter(iter);//free the iterator
@@ -186,12 +181,9 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
 		char* val=tobinary(tree->c);
 		strcat(array,"1");
 		strcat(array,val);
-		//printf("%s %c %d %d\n",array,tree->c,tree->count,tree->size);
 		free(val);
 	}
-	//printf("%c%c\n",tree->left->c,tree->right->c);
 	else{
-//		printf("mhm");
 		strcat(array,"0");
 		huffmantree_tostringhelp(tree->left,array);
 		huffmantree_tostringhelp(tree->right,array);
@@ -204,7 +196,6 @@ void huffmantree_tostringhelp(huffmantree* tree,char* array){
  */
 char* huffmantree_tostring(huffmantree* tree){
 	char* array=malloc(sizeof(char)*CHAR_BIT*(tree->size+1)+1);
-	//printf("sizeof array=%d\n",sizeof(char)*CHAR_BIT*(tree->size+1)*10);
 	array[0]=0;
 	huffmantree_tostringhelp(tree,array);
 	return array;
