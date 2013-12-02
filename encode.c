@@ -267,6 +267,8 @@ int main(int argc, char *argv[]){
     	exit(3);
     }
 	huffmantree* tree=frequency_tree(f);
+	char* tree_string=huffmantree_tostring(tree);
+	printf("treestring %s\n", tree_string);
 	rewind(f);
 	FILE* out=stdout;
 	if (argc>2){
